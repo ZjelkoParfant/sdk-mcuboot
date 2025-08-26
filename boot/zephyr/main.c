@@ -479,6 +479,15 @@ static void boot_serial_enter()
 }
 #endif
 
+#ifdef CONFIG_MCUBOOT_DAISYCHAIN
+#include <zephyr/drivers/uart.h>
+#include <zephyr/drivers/gpio.h>
+
+const struct device *uart1 = DEVICE_DT_GET(DT_NODELABEL(uart1));
+const struct gpio_dt_spec gpio_pctrl = GPIO_DT_SPEC_GET(DT_PATH(zephyr_user), powerctrl_gpios);
+
+#endif
+
 int main(void)
 {
     struct boot_rsp rsp;
@@ -493,6 +502,21 @@ int main(void)
 
 #if !defined(MCUBOOT_DIRECT_XIP)
     BOOT_LOG_INF("Starting bootloader");
+    BOOT_LOG_INF("Using Alltrons fork of mcuboot");
+#ifdef CONFIG_MCUBOOT_DAISYCHAIN
+    char message[]="sending daisy chained data on UART1";
+    uart_tx(uart1, message, sizeof(message), SYS_FOREVER_US);
+
+    // enable power to next device
+    BOOT_LOG_INF("Enabling next device in chain");
+
+    gpio_pin_configure_dt(&gpio_pctrl, GPIO_OUTPUT_INACTIVE);
+
+    gpio_pin_set_dt(&gpio_pctrl, 1);
+
+    BOOT_LOG_INF("Checking for DFU message");
+#endif
+
 #else
     BOOT_LOG_INF("Starting Direct-XIP bootloader");
 #endif

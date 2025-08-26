@@ -1326,4 +1326,11 @@ config NCS_MCUBOOT_IMG_VALIDATE_ATTEMPT_WAIT_MS
 	  Time between image validation attempts, in milliseconds.
 	  Allows for recovery from transient bit flips or similar situations.
 
+config MCUBOOT_DAISYCHAIN
+    bool "Enable daisy-chain UART forwarding"
+    default n
+    help
+      If enabled, MCUboot will check upstream UART for DFU requests
+      and forward packets downstream if not addressed to this node.
+
 source "Kconfig.zephyr"
